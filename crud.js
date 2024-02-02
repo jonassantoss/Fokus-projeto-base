@@ -9,18 +9,39 @@ const btnCancel = document.querySelector(".app__form-footer__button--cancel");
 const overlayEditTask = document.querySelector(".overlayEditTask");
 const editPage = document.querySelector(".task-edit-page");
 const closeEditPage = document.querySelector(".close-editTask-button");
+const currentTaskSection = document.querySelector(".app__section-active-task-description");
 
 let taskToEdit;
+let currentTask;
 
 btnAddTask.addEventListener("click", (e) => {
   e.preventDefault();
   form.classList.toggle("hidden");
+  textarea.focus();
 });
 
 btnSave.addEventListener("click", (e) => {
   e.preventDefault();
+  if (!textarea.value) {
+    errorMessage(1);
+    return
+  }
   createTask(textarea.value);
   form.classList.toggle("hidden");
+});
+
+textarea.addEventListener("keydown", (key) => {
+  if (key.keyCode === 13) {
+    key.preventDefault();
+    if (!textarea.value) {
+      errorMessage(1);
+      return
+    }
+    createTask(textarea.value);
+    form.classList.toggle("hidden");
+  } else if (key.keyCode === 27) {
+    form.classList.toggle("hidden");
+  }
 });
 
 btnCancel.addEventListener("click", (e) => {
@@ -29,8 +50,24 @@ btnCancel.addEventListener("click", (e) => {
 });
 
 btnSaveEdit.addEventListener("click", () => {
+  if (!editInput.value) {
+    errorMessage(0);
+    return
+  }
   editTask();
   handlePageClose(false);
+});
+
+editInput.addEventListener("keydown", (key) => {
+  if (key.keyCode == 13) {
+    key.preventDefault();
+    if (!editInput.value || !taskToEdit) {
+      errorMessage(0);
+      return
+    }
+    editTask();
+    handlePageClose(false);
+  }
 })
 
 closeEditPage.addEventListener("click", () => {
@@ -41,16 +78,21 @@ function clearInput() {
   textarea.value = "";
 }
 
-function createTask(text) {
+function createTask(text, key) {
   let task = document.createElement("li");
   let template = createTaskTemplate(text);
   let splitterButtons = createTaskButtons();
+
+  if (key) {
+    task.classList.add("app__section-task-list-item-complete");
+  }
 
   task.classList.add("app__section-task-list-item");
   task.appendChild(template);
   task.appendChild(splitterButtons);
   taskList.appendChild(task);
   saveTask();
+  getCurrentTask();
   clearInput();
 }
 
@@ -71,6 +113,7 @@ function createIconStatus() {
   let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
+  svg.classList.add("app__section-task-icon-status");
 
   // Adding circle
   let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -88,6 +131,8 @@ function createIconStatus() {
   img.setAttribute("width", "12");
   img.setAttribute("height", "12");
   svg.appendChild(img);
+
+  addCompleteTask(svg);
 
   return svg;
 }
@@ -119,7 +164,7 @@ function createEditButton() {
   editIcon.setAttribute("src", "imagens/edit.png");
   button.classList.add("app__button-edit");
   button.appendChild(editIcon);
-  openEditTask(button);
+  addEditTask(button);
 
   return button;
 }
@@ -131,7 +176,7 @@ function createDeleteButton() {
   deleteIcon.setAttribute("src", "imagens/delete.png");
   button.classList.add("app__button-delete");
   button.appendChild(deleteIcon);
-  openDeleteTask(button);
+  deleteTask(button);
 
   return button;
 }
@@ -139,46 +184,71 @@ function createDeleteButton() {
 function editTask() {
   taskToEdit.textContent = editInput.value;
   saveTask();
+  getCurrentTask();
   clearInput();
 }
 
-function openEditTask(editButton) {
+function completeTask(icon) {
+  let task = icon.parentElement.parentElement;
+  task.classList.toggle("app__section-task-list-item-complete");
+}
+
+function addEditTask(editButton) {
   editButton.addEventListener("click", function () {
     handlePageClose(true);
+    editInput.focus();
     let task = this.parentElement.previousElementSibling.children[1];
     taskToEdit = task;
   });
 }
 
-function openDeleteTask(deleteButton) {
+function addCompleteTask(iconStatus) {
+  iconStatus.addEventListener("click", () => {
+    completeTask(iconStatus);
+    saveTask();
+    getCurrentTask();
+  })
+}
+
+function deleteTask(deleteButton) {
   deleteButton.addEventListener("click", function() {
     let task = this.parentElement.parentElement;
     task.remove();
     saveTask();
+    getCurrentTask();
   })
 }
 
 function saveTask() {
-  const tasksArray = [];
-  const tasks = taskList.querySelectorAll(
-    "div.app__section-task-list-item-description"
-  );
+  const activeTasksArray = [];
+  const completeTasksArray = [];
+  const tasks = taskList.querySelectorAll("li");
 
   tasks.forEach((task) => {
-    let text = task.innerText;
-    tasksArray.push(text);
+    if (task.classList.contains("app__section-task-list-item-complete")) {
+      let text = task.children[0].children[1].textContent;
+      completeTasksArray.push(text)
+    } else {
+      let text = task.children[0].children[1].textContent;
+      activeTasksArray.push(text);
+    }
   });
 
-  let tasksArrayJSON = JSON.stringify(tasksArray);
-  localStorage.setItem("Tarefas", tasksArrayJSON);
+  let activeTasksArrayJSON = JSON.stringify(activeTasksArray);
+  let completeTasksArrayJSON = JSON.stringify(completeTasksArray);
+  localStorage.setItem("Ativas", activeTasksArrayJSON);
+  localStorage.setItem("Concluidas", completeTasksArrayJSON);
 }
 
 function getTasks() {
-  let tasksArrayJSON = localStorage.getItem("Tarefas");
-  let tasksArray = JSON.parse(tasksArrayJSON);
+  let activeTasksArrayJSON = localStorage.getItem("Ativas");
+  let completeTasksArrayJSON = localStorage.getItem("Concluidas");
+  let activeTasksArray = JSON.parse(activeTasksArrayJSON);
+  let completeTasksArray = JSON.parse(completeTasksArrayJSON);
 
   try {
-    tasksArray.forEach((task) => createTask(task));
+    activeTasksArray.forEach(task => createTask(task, 0));
+    completeTasksArray.forEach(task => createTask(task, 1));
   } catch (error) {
     console.log("Não há tarefas salvas.");
   }
@@ -196,4 +266,36 @@ function handlePageClose(animationState) {
   }
 }
 
+function getCurrentTask() {
+  let tasksArray = taskList.querySelectorAll("li");
+  currentTask = "";
+  
+  for (task of tasksArray) {
+    if (!task.classList.contains("app__section-task-list-item-complete")) {
+      currentTask = task.textContent;
+      break;
+    }
+  }
+
+  currentTaskSection.textContent = currentTask;
+}
+
+function errorMessage(i) {
+  let errorMessage;
+
+  if (i === 0) {
+    errorMessage = editInput.parentElement.nextElementSibling;
+  } else {
+    errorMessage = textarea.previousElementSibling;
+  }
+
+  errorMessage.style.display = 'block'
+  setTimeout(() => errorMessage.style.opacity = 1, 100)
+  setTimeout(() => {
+    errorMessage.style.opacity = 0
+    errorMessage.style.display = 'none'
+  }, 5000)
+}
+
 getTasks();
+getCurrentTask();

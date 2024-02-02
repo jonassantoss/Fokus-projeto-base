@@ -26,9 +26,11 @@
             close
         </span>
         <div class="task-edit-page">
-            <span class="error-message">Please insert a valid value</span>
-            <input type="text" name="task" class="input-edit-task" placeholder="Novo nome da tarefa">
-            <input type="button" value="Salvar" class="btn-save-edit-task">
+            <div class="task-edit-page-wrapper">
+                <input type="text" name="task" class="input-edit-task" placeholder="Novo nome da tarefa">
+                <input type="button" value="Salvar" class="btn-save-edit-task">
+            </div>
+            <span class="error-message task-edit-error-message">Por favor, insira um nome válido para a tarefa</span>
         </div>
     </div>
     <main class="app">
@@ -113,10 +115,11 @@
             <ul class="app__section-task-list"></ul>
             <form class="app__form-add-task hidden" aria-hidden="true" novalidate>
                 <div class="app__form-field">
-                    <label class="app__form-label">
+                    <label for="form__textarea" class="app__form-label">
                         Adicionando tarefa
                     </label>
-                    <textarea required rows="4" class="app__form-textarea" placeholder="No que você esta trabalhando?"></textarea>
+                    <span class="error-message">Por favor, insira um nome válido para a tarefa</span>
+                    <textarea required rows="4" id="form__textarea" class="app__form-textarea" placeholder="No que você esta trabalhando?"></textarea>
                 </div>
                 <footer class="app__form-footer">
                     <button type="reset" class="app__form-footer__button app__form-footer__button--delete">
