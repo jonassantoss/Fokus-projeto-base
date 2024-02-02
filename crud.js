@@ -3,7 +3,14 @@ const textarea = document.querySelector(".app__form-textarea");
 const taskList = document.querySelector(".app__section-task-list");
 const btnAddTask = document.querySelector(".app__button--add-task");
 const btnSave = document.querySelector(".app__form-footer__button--save");
+const btnSaveEdit = document.querySelector(".btn-save-edit-task");
+const editInput = document.querySelector(".input-edit-task")
 const btnCancel = document.querySelector(".app__form-footer__button--cancel");
+const overlayEditTask = document.querySelector(".overlayEditTask");
+const editPage = document.querySelector(".task-edit-page");
+const closeEditPage = document.querySelector(".close-editTask-button");
+
+let taskToEdit;
 
 btnAddTask.addEventListener("click", (e) => {
   e.preventDefault();
@@ -21,12 +28,21 @@ btnCancel.addEventListener("click", (e) => {
   form.classList.add("hidden");
 });
 
+btnSaveEdit.addEventListener("click", () => {
+  editTask();
+  handlePageClose(false);
+})
+
+closeEditPage.addEventListener("click", () => {
+  handlePageClose(false);
+});
+
 function clearInput() {
   textarea.value = "";
 }
 
 function createTask(text) {
-  let task = document.createElement("div");
+  let task = document.createElement("li");
   let template = createTaskTemplate(text);
   let splitterButtons = createTaskButtons();
 
@@ -36,7 +52,7 @@ function createTask(text) {
   taskList.appendChild(task);
   saveTask();
   clearInput();
-};
+}
 
 function createTaskTemplate(text) {
   let splitter = document.createElement("div");
@@ -103,6 +119,7 @@ function createEditButton() {
   editIcon.setAttribute("src", "imagens/edit.png");
   button.classList.add("app__button-edit");
   button.appendChild(editIcon);
+  openEditTask(button);
 
   return button;
 }
@@ -112,18 +129,41 @@ function createDeleteButton() {
   let deleteIcon = document.createElement("img");
 
   deleteIcon.setAttribute("src", "imagens/delete.png");
-  deleteIcon.setAttribute("width", "32");
-  deleteIcon.setAttribute("height", "32");
   button.classList.add("app__button-delete");
   button.appendChild(deleteIcon);
+  openDeleteTask(button);
 
-  return button
+  return button;
+}
+
+function editTask() {
+  taskToEdit.textContent = editInput.value;
+  saveTask();
+  clearInput();
+}
+
+function openEditTask(editButton) {
+  editButton.addEventListener("click", function () {
+    handlePageClose(true);
+    let task = this.parentElement.previousElementSibling.children[1];
+    taskToEdit = task;
+  });
+}
+
+function openDeleteTask(deleteButton) {
+  deleteButton.addEventListener("click", function() {
+    let task = this.parentElement.parentElement;
+    task.remove();
+    saveTask();
+  })
 }
 
 function saveTask() {
   const tasksArray = [];
-  const tasks = taskList.querySelectorAll("div.app__section-task-list-item-description");
-  
+  const tasks = taskList.querySelectorAll(
+    "div.app__section-task-list-item-description"
+  );
+
   tasks.forEach((task) => {
     let text = task.innerText;
     tasksArray.push(text);
@@ -136,11 +176,23 @@ function saveTask() {
 function getTasks() {
   let tasksArrayJSON = localStorage.getItem("Tarefas");
   let tasksArray = JSON.parse(tasksArrayJSON);
-  
+
   try {
-    tasksArray.forEach(task => createTask(task));
+    tasksArray.forEach((task) => createTask(task));
   } catch (error) {
-    console.log("Não há tarefas salvas.")
+    console.log("Não há tarefas salvas.");
+  }
+}
+
+function handlePageClose(animationState) {
+  if (animationState) {
+    overlayEditTask.style.display = "flex";
+    editPage.style.transform = "scale(1)";
+    setTimeout(() => (overlayEditTask.style.opacity = 1), 100);
+  } else {
+    overlayEditTask.style.opacity = 0;
+    editPage.style.transform = "scale(0.8)";
+    setTimeout(() => (overlayEditTask.style.display = "none"), 500);
   }
 }
 
