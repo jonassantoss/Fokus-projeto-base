@@ -10,6 +10,8 @@ const overlayEditTask = document.querySelector(".overlayEditTask");
 const editPage = document.querySelector(".task-edit-page");
 const closeEditPage = document.querySelector(".close-editTask-button");
 const currentTaskSection = document.querySelector(".app__section-active-task-description");
+const btnDeleteDone = document.querySelector("#btn-remove-done");
+const btnDeleteAll = document.querySelector("#btn-remove-all");
 
 let taskToEdit;
 let currentTask;
@@ -41,12 +43,14 @@ textarea.addEventListener("keydown", (key) => {
     form.classList.toggle("hidden");
   } else if (key.keyCode === 27) {
     form.classList.toggle("hidden");
+    btnAddTask.focus();
   }
 });
 
 btnCancel.addEventListener("click", (e) => {
   e.preventDefault();
   form.classList.add("hidden");
+  btnAddTask.focus();
 });
 
 btnSaveEdit.addEventListener("click", () => {
@@ -74,6 +78,18 @@ closeEditPage.addEventListener("click", () => {
   handlePageClose(false);
 });
 
+btnDeleteDone.addEventListener("click", () => {
+  deleteDoneTasks();
+  saveTask();
+  getCurrentTask();
+});
+
+btnDeleteAll.addEventListener("click", () => {
+  deleteAllTasks();
+  saveTask();
+  getCurrentTask();
+})
+
 function clearInput() {
   textarea.value = "";
 }
@@ -94,6 +110,7 @@ function createTask(text, key) {
   saveTask();
   getCurrentTask();
   clearInput();
+  btnAddTask.focus();
 }
 
 function createTaskTemplate(text) {
@@ -114,6 +131,7 @@ function createIconStatus() {
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
   svg.classList.add("app__section-task-icon-status");
+  svg.setAttribute("aria-label", "Botão concluir tarefa");
 
   // Adding circle
   let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -163,6 +181,7 @@ function createEditButton() {
 
   editIcon.setAttribute("src", "imagens/edit.png");
   button.classList.add("app__button-edit");
+  button.setAttribute("aria-label", "Botão editar tarefa");
   button.appendChild(editIcon);
   addEditTask(button);
 
@@ -175,6 +194,7 @@ function createDeleteButton() {
 
   deleteIcon.setAttribute("src", "imagens/delete.png");
   button.classList.add("app__button-delete");
+  button.setAttribute("aria-label", "Botão excluir tarefa");
   button.appendChild(deleteIcon);
   deleteTask(button);
 
@@ -217,6 +237,22 @@ function deleteTask(deleteButton) {
     saveTask();
     getCurrentTask();
   })
+}
+
+function deleteDoneTasks() {
+  let tasks = taskList.querySelectorAll("li");
+  tasks.forEach(task => {
+    if (task.classList.contains("app__section-task-list-item-complete")) {
+      task.remove();
+    }
+  })
+}
+
+function deleteAllTasks() {
+  let tasks = taskList.querySelectorAll("li");
+  tasks.forEach(task => {
+    task.remove();
+  });
 }
 
 function saveTask() {
