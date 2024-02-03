@@ -9,16 +9,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css"
         integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Prata&family=Unbounded:wght@200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="./styles.css">
-    <script src="app.js" defer></script>
+    <script src="./app.js" defer></script>
+    <script src="./crud.js" defer></script>
 </head>
 
 <body>
+    <div class="overlayEditTask">
+        <span class="close-editTask-button material-symbols-outlined">
+            close
+        </span>
+        <div class="task-edit-page">
+            <div class="task-edit-page-wrapper">
+                <input type="text" name="task" class="input-edit-task" placeholder="Novo nome da tarefa">
+                <input type="button" value="Salvar" class="btn-save-edit-task">
+            </div>
+            <span class="error-message task-edit-error-message">Por favor, insira um nome válido para a tarefa</span>
+        </div>
+    </div>
     <main class="app">
         <header class="app__header">
             <figure class="app__logo-figure">
@@ -71,6 +85,59 @@
                     </button>
                 </div>
             </div>
+        </section>
+
+        <section class="app__section-task-container">
+            <div class="app__section-task-content">
+                <header class="app__section-active-task">
+                    <p class="app__section-active-task-label">Tarefa em andamento:</p>
+                    <p class="app__section-active-task-description"></p>
+                </header>
+            </div>
+            <div class="app__section-task-header">
+                <h2 class="app__section-tasks-heading">Lista de Tarefas:</h2>
+                <div class="dropdown-container" aria-label="Menu dropdown">
+                    <button class="app__button-more">
+                        <img src="/imagens/more.svg" alt="">
+                    </button>
+                    <ul class="app__section-task-header__ul">
+                        <li class="app__section-task-header__li__button" id="btn-remove-done" aria-label="Botão limpar tarefas concluídas">
+                            <img src="/imagens/check.svg" alt="">
+                            Limpar tarefas concluídas
+                        </li>
+                        <li class="app__section-task-header__li__button" id="btn-remove-all" aria-label="Botão limpar todas as tarefas">
+                            <img src="imagens/trash.svg" alt="">
+                            Limpar todas as tarefas
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <ul class="app__section-task-list"></ul>
+            <form class="app__form-add-task hidden" aria-hidden="true" novalidate>
+                <div class="app__form-field">
+                    <label for="form__textarea" class="app__form-label">
+                        Adicionando tarefa
+                    </label>
+                    <span class="error-message">Por favor, insira um nome válido para a tarefa</span>
+                    <textarea required rows="4" id="form__textarea" class="app__form-textarea" placeholder="No que você esta trabalhando?"></textarea>
+                </div>
+                <footer class="app__form-footer">
+                    <button type="reset" class="app__form-footer__button app__form-footer__button--delete">
+                        <img src="imagens/delete.png" alt=""> Deletar
+                    </button>
+                    <div class="splitter">
+                        <button class="app__form-footer__button app__form-footer__button--cancel">
+                            <img src="imagens/close.png" alt=""> Cancelar
+                        </button>
+                        <button class="app__form-footer__button app__form-footer__button--save">
+                            <img src="imagens/save.png" alt=""> Salvar
+                        </button>
+                    </div>
+                </footer>
+            </form>
+            <button class="app__button--add-task">
+                <img src="imagens/add_circle.png" alt=""> Adicionar nova tarefa
+            </button>
         </section>
 
         <footer class="app__footer">
