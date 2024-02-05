@@ -503,6 +503,10 @@ h6 {
     font-family: Montserrat;
 }
 
+.app__section-task-list-item-active.app__section-task-list-item {
+    border: 2px solid #fff;
+}
+
 .app__section-task-list-item-complete.app__section-task-list-item {
     background: var(--fundo-card-concluido);
     color: #fff;

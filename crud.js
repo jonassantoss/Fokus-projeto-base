@@ -106,6 +106,7 @@ function createTask(text, key) {
   task.classList.add("app__section-task-list-item");
   task.appendChild(template);
   task.appendChild(splitterButtons);
+  selectTask(task, text);
   taskList.appendChild(task);
   saveTask();
   getCurrentTask();
@@ -206,6 +207,21 @@ function editTask() {
   saveTask();
   getCurrentTask();
   clearInput();
+}
+
+function selectTask(task, text) {
+  task.addEventListener("click", () => {
+    removeSelections();
+    currentTaskSection.textContent = text;
+    task.classList.add("app__section-task-list-item-active");
+  })
+}
+
+function removeSelections() {
+  const tasks = taskList.querySelectorAll("li");
+  tasks.forEach(item => {
+    item.classList.remove("app__section-task-list-item-active");
+  })
 }
 
 function completeTask(icon) {
