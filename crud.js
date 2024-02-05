@@ -4,12 +4,14 @@ const taskList = document.querySelector(".app__section-task-list");
 const btnAddTask = document.querySelector(".app__button--add-task");
 const btnSave = document.querySelector(".app__form-footer__button--save");
 const btnSaveEdit = document.querySelector(".btn-save-edit-task");
-const editInput = document.querySelector(".input-edit-task")
+const editInput = document.querySelector(".input-edit-task");
 const btnCancel = document.querySelector(".app__form-footer__button--cancel");
 const overlayEditTask = document.querySelector(".overlayEditTask");
 const editPage = document.querySelector(".task-edit-page");
 const closeEditPage = document.querySelector(".close-editTask-button");
-const currentTaskSection = document.querySelector(".app__section-active-task-description");
+const currentTaskSection = document.querySelector(
+  ".app__section-active-task-description"
+);
 const btnDeleteDone = document.querySelector("#btn-remove-done");
 const btnDeleteAll = document.querySelector("#btn-remove-all");
 
@@ -26,7 +28,7 @@ btnSave.addEventListener("click", (e) => {
   e.preventDefault();
   if (!textarea.value) {
     errorMessage(1);
-    return
+    return;
   }
   createTask(textarea.value);
   form.classList.toggle("hidden");
@@ -37,7 +39,7 @@ textarea.addEventListener("keydown", (key) => {
     key.preventDefault();
     if (!textarea.value) {
       errorMessage(1);
-      return
+      return;
     }
     createTask(textarea.value);
     form.classList.toggle("hidden");
@@ -56,7 +58,7 @@ btnCancel.addEventListener("click", (e) => {
 btnSaveEdit.addEventListener("click", () => {
   if (!editInput.value) {
     errorMessage(0);
-    return
+    return;
   }
   editTask();
   handlePageClose(false);
@@ -67,12 +69,12 @@ editInput.addEventListener("keydown", (key) => {
     key.preventDefault();
     if (!editInput.value || !taskToEdit) {
       errorMessage(0);
-      return
+      return;
     }
     editTask();
     handlePageClose(false);
   }
-})
+});
 
 closeEditPage.addEventListener("click", () => {
   handlePageClose(false);
@@ -81,17 +83,16 @@ closeEditPage.addEventListener("click", () => {
 btnDeleteDone.addEventListener("click", () => {
   deleteDoneTasks();
   saveTask();
-  getCurrentTask();
 });
 
 btnDeleteAll.addEventListener("click", () => {
   deleteAllTasks();
   saveTask();
-  getCurrentTask();
-})
+});
 
 function clearInput() {
   textarea.value = "";
+  editInput.value = "";
 }
 
 function createTask(text, key) {
@@ -106,10 +107,8 @@ function createTask(text, key) {
   task.classList.add("app__section-task-list-item");
   task.appendChild(template);
   task.appendChild(splitterButtons);
-  selectTask(task, text);
   taskList.appendChild(task);
   saveTask();
-  getCurrentTask();
   clearInput();
   btnAddTask.focus();
 }
@@ -160,6 +159,7 @@ function createTaskDescription(text) {
   let description = document.createElement("div");
   description.classList.add("app__section-task-list-item-description");
   description.textContent = text;
+  selectTask(description);
 
   return description;
 }
@@ -204,29 +204,34 @@ function createDeleteButton() {
 
 function editTask() {
   taskToEdit.textContent = editInput.value;
+  let task = taskToEdit.parentElement.parentElement;
+  if (task.classList.contains("app__section-task-list-item-active")) {
+    currentTaskSection.textContent = taskToEdit.textContent;
+    currentTask = taskToEdit.textContent;
+  }
+  saveCurrentTask();
   saveTask();
-  getCurrentTask();
   clearInput();
 }
 
-function selectTask(task, text) {
-  task.addEventListener("click", () => {
-    removeSelections();
-    currentTaskSection.textContent = text;
-    task.classList.add("app__section-task-list-item-active");
-  })
-}
-
-function removeSelections() {
-  const tasks = taskList.querySelectorAll("li");
-  tasks.forEach(item => {
-    item.classList.remove("app__section-task-list-item-active");
-  })
+function selectTask(description) {
+  description.addEventListener("click", () => {
+    let task = description.parentElement.parentElement;
+    if (!task.classList.contains("app__section-task-list-item-complete")) {
+      removeSelection();
+      currentTaskSection.textContent = description.textContent;
+      task.classList.toggle("app__section-task-list-item-active");
+      currentTask = description.textContent;
+      saveCurrentTask();
+    saveTask();
+    }
+  });
 }
 
 function completeTask(icon) {
   let task = icon.parentElement.parentElement;
   task.classList.toggle("app__section-task-list-item-complete");
+  task.classList.remove("app__section-task-list-item-active");
 }
 
 function addEditTask(editButton) {
@@ -240,35 +245,54 @@ function addEditTask(editButton) {
 
 function addCompleteTask(iconStatus) {
   iconStatus.addEventListener("click", () => {
+    let text = iconStatus.nextElementSibling.textContent;
     completeTask(iconStatus);
+    if (currentTaskSection.textContent === text) {
+      currentTaskSection.textContent = "";
+      currentTask = "";
+    }
+    saveCurrentTask();
     saveTask();
-    getCurrentTask();
-  })
+  });
 }
 
 function deleteTask(deleteButton) {
-  deleteButton.addEventListener("click", function() {
+  deleteButton.addEventListener("click", function () {
     let task = this.parentElement.parentElement;
+    let text = task.textContent;
+    if (currentTaskSection.textContent === text) {
+      currentTaskSection.textContent = "";
+      currentTask = "";
+    }
     task.remove();
+    saveCurrentTask();
     saveTask();
-    getCurrentTask();
-  })
+  });
 }
 
 function deleteDoneTasks() {
   let tasks = taskList.querySelectorAll("li");
-  tasks.forEach(task => {
+  tasks.forEach((task) => {
     if (task.classList.contains("app__section-task-list-item-complete")) {
+      if (task.textContent === currentTaskSection.textContent) {
+        currentTaskSection.textContent = "";
+        currentTask = "";
+      }
       task.remove();
     }
-  })
+  });
+  saveCurrentTask();
+  saveTask();
 }
 
 function deleteAllTasks() {
   let tasks = taskList.querySelectorAll("li");
-  tasks.forEach(task => {
+  tasks.forEach((task) => {
     task.remove();
   });
+  currentTask = "";
+  removeSelection();
+  saveCurrentTask();
 }
 
 function saveTask() {
@@ -278,10 +302,10 @@ function saveTask() {
 
   tasks.forEach((task) => {
     if (task.classList.contains("app__section-task-list-item-complete")) {
-      let text = task.children[0].children[1].textContent;
-      completeTasksArray.push(text)
+      let text = task.textContent;
+      completeTasksArray.push(text);
     } else {
-      let text = task.children[0].children[1].textContent;
+      let text = task.textContent;
       activeTasksArray.push(text);
     }
   });
@@ -299,11 +323,26 @@ function getTasks() {
   let completeTasksArray = JSON.parse(completeTasksArrayJSON);
 
   try {
-    activeTasksArray.forEach(task => createTask(task, 0));
-    completeTasksArray.forEach(task => createTask(task, 1));
+    activeTasksArray.forEach((task) => createTask(task, 0));
+    completeTasksArray.forEach((task) => createTask(task, 1));
   } catch (error) {
     console.log("Não há tarefas salvas.");
   }
+}
+
+function saveCurrentTask() {
+  localStorage.setItem("Atual", currentTask);
+}
+
+function getCurrentTask() {
+  const tasks = taskList.querySelectorAll("li");
+  currentTask = localStorage.getItem("Atual");
+  tasks.forEach((task) => {
+    if (task.textContent === currentTask) {
+      task.classList.add("app__section-task-list-item-active");
+    }
+  });
+  currentTaskSection.textContent = currentTask;
 }
 
 function handlePageClose(animationState) {
@@ -318,18 +357,14 @@ function handlePageClose(animationState) {
   }
 }
 
-function getCurrentTask() {
+function removeSelection() {
   let tasksArray = taskList.querySelectorAll("li");
-  currentTask = "";
-  
-  for (task of tasksArray) {
-    if (!task.classList.contains("app__section-task-list-item-complete")) {
-      currentTask = task.textContent;
-      break;
-    }
-  }
 
-  currentTaskSection.textContent = currentTask;
+  tasksArray.forEach((item) => {
+    item.classList.remove("app__section-task-list-item-active");
+  });
+
+  currentTaskSection.textContent = "";
 }
 
 function errorMessage(i) {
@@ -341,12 +376,12 @@ function errorMessage(i) {
     errorMessage = textarea.previousElementSibling;
   }
 
-  errorMessage.style.display = 'block'
-  setTimeout(() => errorMessage.style.opacity = 1, 100)
+  errorMessage.style.display = "block";
+  setTimeout(() => (errorMessage.style.opacity = 1), 100);
   setTimeout(() => {
-    errorMessage.style.opacity = 0
-    errorMessage.style.display = 'none'
-  }, 5000)
+    errorMessage.style.opacity = 0;
+    errorMessage.style.display = "none";
+  }, 5000);
 }
 
 getTasks();

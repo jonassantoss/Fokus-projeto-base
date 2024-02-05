@@ -67,7 +67,7 @@ start.addEventListener("click", function () {
     interval = setInterval(() => {
       let response = counter(context);
       timer.innerHTML = response;
-    }, 1000);
+    }, 100);
   }
 });
 
@@ -171,7 +171,16 @@ function counter(context) {
     }
   }
 
+  if (times[i].min === 0 && times[i].sec === 0) {
+    finishTimer();
+  }
+
   return `${zero(times[i].min)}:${zero(times[i].sec)}`;
+}
+
+function finishTimer() {
+  audio.src = "sons/beep.mp3";
+  audio.play();
 }
 
 function zero(num) {
