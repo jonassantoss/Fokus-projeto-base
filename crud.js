@@ -292,7 +292,7 @@ function getTasks() {
 
 function handlePageClose(animationState) {
   if (animationState) {
-    overlayEditTask.style.display = "flex";
+    overlayEditTask.style.display = "block";
     editPage.style.transform = "scale(1)";
     setTimeout(() => (overlayEditTask.style.opacity = 1), 100);
   } else {

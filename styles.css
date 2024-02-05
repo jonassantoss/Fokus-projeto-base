@@ -303,28 +303,6 @@ h6 {
 
 /* fim - toggle */
 
-/* Para Tablets */
-@media (max-width: 1024px) and (min-width: 768px) {
-    .app__section-banner-container {
-        width: 48rem;
-    }
-}
-
-/* Para Celulares */
-@media (max-width: 767px) {
-    .app__section-banner-container {
-        width: 32rem;
-    }
-
-    .app__title {
-        font-size: 2.6rem;
-    }
-
-    .app__card-timer {
-        font-size: 6rem;
-    }
-}
-
 .hidden {
     display: none;
 }
@@ -355,22 +333,30 @@ h6 {
     justify-content: center;
     align-items: center;
     gap: 2rem;
+    z-index: 1;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
 }
 
 .wrapper {
     height: 100%;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
+.close-editTask-button {
+    margin: 1rem 0 0 1rem;
+}
+
 .task-edit-page {
-    background-color: #fff;
-    width: 50vw;
-    height: 7vh;
-    padding: 1rem 2rem;
+    padding: 2rem;
+    background-color: #fff; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     border-radius: 5px;
 
     transform: scale(0.8);
@@ -378,9 +364,12 @@ h6 {
 }
 
 .task-edit-page-wrapper {
+    width: 100%;
+    
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
 .input-edit-task {
@@ -620,7 +609,7 @@ h6 {
 }
 
 .btn-save-edit-task {
-    width: fit-content;
+    width: 25%;
     padding: 0 1.8rem;
     margin: 0;
 }
@@ -629,4 +618,58 @@ h6 {
     color: #e6e6e6;
     opacity: 0.8;
     cursor: not-allowed;
+}
+
+/* Para Tablets */
+@media (max-width: 1024px) and (min-width: 768px) {
+    .app__section-banner-container {
+        width: 48rem;
+    }
+}
+
+/* Para Celulares */
+@media (max-width: 767px) {
+    .app__section-banner-container {
+        width: 32rem;
+    }
+
+    .app__title {
+        font-size: 2.6rem;
+    }
+
+    .app__card-timer {
+        font-size: 6rem;
+    }
+
+    .app__section-active-task {
+        justify-content: center;
+        gap: 1rem;
+        padding-bottom: 4rem;
+        margin: 4rem 0;
+    }
+
+    .app__section-task-header {
+        align-items: center;
+    }
+
+    .app__section-task-list-item {
+        gap: 1rem;
+    }
+
+    .app__section-task-list-item .splitter {
+        gap: 1rem;
+    }
+
+    .app__form-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 0;
+        padding: 0;
+    }
+
+    .app__form-footer__button--delete {
+        width: 7%;
+        font-size: 1.2rem;
+        padding: 0;
+    }
 }
