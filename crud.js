@@ -1,3 +1,4 @@
+// Seleção de elementos HTML
 const form = document.querySelector(".app__form-add-task");
 const textarea = document.querySelector(".app__form-textarea");
 const taskList = document.querySelector(".app__section-task-list");
@@ -15,57 +16,92 @@ const currentTaskSection = document.querySelector(
 const btnDeleteDone = document.querySelector("#btn-remove-done");
 const btnDeleteAll = document.querySelector("#btn-remove-all");
 
+// Variáveis para armazenar tarefas em edição e a tarefa atual
 let taskToEdit;
 let currentTask;
 
-btnAddTask.addEventListener("click", (e) => {
+// Adiciona ouvintes de eventos aos botões e elementos
+btnAddTask.addEventListener("click", toggleFormVisibility);
+btnSave.addEventListener("click", createNewTask);
+textarea.addEventListener("keydown", createNewTaskOnEnter);
+btnCancel.addEventListener("click", cancelNewTask);
+btnSaveEdit.addEventListener("click", saveEditedTask);
+editInput.addEventListener("keydown", saveEditedTaskOnEnter);
+closeEditPage.addEventListener("click", closeEditTaskPage);
+btnDeleteDone.addEventListener("click", deleteDoneTasks);
+btnDeleteAll.addEventListener("click", deleteAllTasks);
+
+/**
+ * Alterna a visibilidade do formulário de adição de tarefas
+ * @param {Event} e - Evento de clique no botão de adição de tarefa
+ */
+function toggleFormVisibility(e) {
   e.preventDefault();
   form.classList.toggle("hidden");
   textarea.focus();
-});
+}
 
-btnSave.addEventListener("click", (e) => {
+/**
+ * Cria uma nova tarefa na lista de tarefas
+ * @param {Event} e - Evento de clique no botão de adição de tarefa
+ */
+function createNewTask(e) {
   e.preventDefault();
   if (!textarea.value) {
-    errorMessage(1);
+    displayErrorMessage(1);
     return;
   }
-  createTask(textarea.value);
+  createTask(textarea.value, false);
   form.classList.toggle("hidden");
-});
+}
 
-textarea.addEventListener("keydown", (key) => {
-  if (key.keyCode === 13) {
+/**
+ * Cria uma nova taarefa ao pressionar a tecla "Enter" ou cancela a operação ao pressionar "Esc"
+ * @param {KeyboardEvent} key - Evento de tecla pressionada
+ */
+function createNewTaskOnEnter(key) {
+  if (key.key === "Enter") {
     key.preventDefault();
     if (!textarea.value) {
       errorMessage(1);
       return;
     }
-    createTask(textarea.value);
+    createTask(textarea.value, false);
     form.classList.toggle("hidden");
-  } else if (key.keyCode === 27) {
+  } else if (key.key === "Escape") {
     form.classList.toggle("hidden");
     btnAddTask.focus();
   }
-});
+}
 
-btnCancel.addEventListener("click", (e) => {
+/**
+ * Cancela a criação de uma nova tarefa e oculta o formulário
+ * @param {Event} e - Evento de clique no botão de cancelamento
+ */
+function cancelNewTask(e) {
   e.preventDefault();
   form.classList.add("hidden");
   btnAddTask.focus();
-});
+}
 
-btnSaveEdit.addEventListener("click", () => {
+/**
+ * Salva a tarefa editada e atualiza a lista de tarefas
+ */
+function saveEditedTask() {
   if (!editInput.value) {
     errorMessage(0);
     return;
   }
   editTask();
   handlePageClose(false);
-});
+}
 
-editInput.addEventListener("keydown", (key) => {
-  if (key.keyCode == 13) {
+/**
+ * Salva a tarefa editada ao pressionar a tecla "Enter" ou cancela a operação ao pressionar "Esc"
+ * @param {KeyboardEvent} key - Evento de tecla pressionada
+ */
+function saveEditedTaskOnEnter(key) {
+  if (key.key === "Enter") {
     key.preventDefault();
     if (!editInput.value || !taskToEdit) {
       errorMessage(0);
@@ -73,28 +109,28 @@ editInput.addEventListener("keydown", (key) => {
     }
     editTask();
     handlePageClose(false);
+  } else if (key.key === "Escape") {
+    handlePageClose(false);
   }
-});
+}
 
-closeEditPage.addEventListener("click", () => {
+function closeEditTaskPage() {
   handlePageClose(false);
-});
+}
 
-btnDeleteDone.addEventListener("click", () => {
-  deleteDoneTasks();
-  saveTask();
-});
-
-btnDeleteAll.addEventListener("click", () => {
-  deleteAllTasks();
-  saveTask();
-});
-
+/**
+ * Limpa os campos de entrada do formulário
+ */
 function clearInput() {
   textarea.value = "";
   editInput.value = "";
 }
 
+/**
+ * Cria uma nova tarefa na lista de tarefas
+ * @param {string} text - Conteúdo da nova tarefa
+ * @param {boolean} key - Indicador se a tarefa criada será completa (true) ou incompleta (false)
+ */
 function createTask(text, key) {
   let task = document.createElement("li");
   let template = createTaskTemplate(text);
@@ -113,6 +149,11 @@ function createTask(text, key) {
   btnAddTask.focus();
 }
 
+/**
+ * Cria o template de uma tarefa na lista
+ * @param {string} text - Conteúdo da nova tarefa
+ * @returns {HTMLDivElement} - Div contendo o ícone de status e nome da tarefa
+ */
 function createTaskTemplate(text) {
   let splitter = document.createElement("div");
   let iconStatus = createIconStatus();
@@ -125,15 +166,19 @@ function createTaskTemplate(text) {
   return splitter;
 }
 
+/**
+ * Cria o ícone de status da tarefa
+ * @returns {HTMLOrSVGElement} Ícone de status da tarefa
+ */
 function createIconStatus() {
-  // Creating SVG element
+  // Criando o elemento SVG
   let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("width", "24");
   svg.setAttribute("height", "24");
   svg.classList.add("app__section-task-icon-status");
   svg.setAttribute("aria-label", "Botão concluir tarefa");
 
-  // Adding circle
+  // Adicionando o círculo
   let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   circle.setAttribute("cx", "12");
   circle.setAttribute("cy", "12");
@@ -141,7 +186,7 @@ function createIconStatus() {
   circle.setAttribute("fill", "#fff");
   svg.appendChild(circle);
 
-  // Adding image
+  // Adicionando a imagem
   let img = document.createElementNS("http://www.w3.org/2000/svg", "image");
   img.setAttribute("href", "imagens/check.png");
   img.setAttribute("x", "6");
@@ -155,6 +200,11 @@ function createIconStatus() {
   return svg;
 }
 
+/**
+ * Cria a descrição da tarefa
+ * @param {string} text - Conteúdo da descrição da tarefa 
+ * @returns {HTMLDivElement} Descrição da tarefa
+ */
 function createTaskDescription(text) {
   let description = document.createElement("div");
   description.classList.add("app__section-task-list-item-description");
@@ -164,6 +214,10 @@ function createTaskDescription(text) {
   return description;
 }
 
+/**
+ * Cria os botões de edição e exclusão da tarefa
+ * @returns {HTMLDivElement} Div contendo os botões de edição e exclusão da tarefa
+ */
 function createTaskButtons() {
   let splitter = document.createElement("div");
   let btnEdit = createEditButton();
@@ -176,6 +230,10 @@ function createTaskButtons() {
   return splitter;
 }
 
+/**
+ * Cria e retorna o botão de edição de uma tarefa
+ * @returns {HTMLButtonElement} Botão de edição da tarefa
+ */
 function createEditButton() {
   let button = document.createElement("button");
   let editIcon = document.createElement("img");
@@ -189,6 +247,10 @@ function createEditButton() {
   return button;
 }
 
+/**
+ * Cria e retorna o botão de exclusão de uma tarefa
+ * @returns {HTMLButtonElement} Botão de exclusão da tarefa
+ */
 function createDeleteButton() {
   let button = document.createElement("button");
   let deleteIcon = document.createElement("img");
@@ -202,6 +264,9 @@ function createDeleteButton() {
   return button;
 }
 
+/**
+ * Edita uma tarefa existente na lista
+ */
 function editTask() {
   taskToEdit.textContent = editInput.value;
   let task = taskToEdit.parentElement.parentElement;
@@ -214,6 +279,10 @@ function editTask() {
   clearInput();
 }
 
+/**
+ * Seleciona uma tarefa da lista
+ * @param {HTMLDivElement} description - Descrição da tarefa selecionada
+ */
 function selectTask(description) {
   description.addEventListener("click", () => {
     let task = description.parentElement.parentElement;
@@ -228,12 +297,29 @@ function selectTask(description) {
   });
 }
 
+/**
+ * Marca uma tarefa como concluída
+ * @param {HTMLOrSVGElement} icon - Ícone de status da tarefa completa
+ */
 function completeTask(icon) {
   let task = icon.parentElement.parentElement;
+  let editButton = task.children[1].children[0];
   task.classList.toggle("app__section-task-list-item-complete");
   task.classList.remove("app__section-task-list-item-active");
+
+  if (editButton.hasAttribute("disabled")) {
+    editButton.removeAttribute("disabled");
+  } else {
+    editButton.setAttribute("disabled", "true");
+  }
 }
 
+// Funções para adicionar comportamentos aos botões
+
+/**
+ * Adiciona o comportamento de edição à tarefa
+ * @param {HTMLButtonElement} editButton - Botão de edição da tarefa
+ */
 function addEditTask(editButton) {
   editButton.addEventListener("click", function () {
     handlePageClose(true);
@@ -243,6 +329,10 @@ function addEditTask(editButton) {
   });
 }
 
+/**
+ * Adiciona o comportamento de conclusão à tarefa
+ * @param {HTMLOrSVGElement} iconStatus - Ícone de status da tarefa
+ */
 function addCompleteTask(iconStatus) {
   iconStatus.addEventListener("click", () => {
     let text = iconStatus.nextElementSibling.textContent;
@@ -256,6 +346,10 @@ function addCompleteTask(iconStatus) {
   });
 }
 
+/**
+ * Adiciona o comportamento de exclusão à tarefa
+ * @param {HTMLButtonElement} deleteButton - Botão de deletar a tarefa
+ */
 function deleteTask(deleteButton) {
   deleteButton.addEventListener("click", function () {
     let task = this.parentElement.parentElement;
@@ -270,6 +364,11 @@ function deleteTask(deleteButton) {
   });
 }
 
+// Funções para manipular a lista de tarefas
+
+/**
+ * Deleta as tarefas concluídas
+ */
 function deleteDoneTasks() {
   let tasks = taskList.querySelectorAll("li");
   tasks.forEach((task) => {
@@ -285,6 +384,9 @@ function deleteDoneTasks() {
   saveTask();
 }
 
+/**
+ * Deleta todas as tarefas
+ */
 function deleteAllTasks() {
   let tasks = taskList.querySelectorAll("li");
   tasks.forEach((task) => {
@@ -293,8 +395,12 @@ function deleteAllTasks() {
   currentTask = "";
   removeSelection();
   saveCurrentTask();
+  saveTask();
 }
 
+/**
+ * Salva as tarefas no armazenamento local do navegador
+ */
 function saveTask() {
   const activeTasksArray = [];
   const completeTasksArray = [];
@@ -316,6 +422,9 @@ function saveTask() {
   localStorage.setItem("Concluidas", completeTasksArrayJSON);
 }
 
+/**
+ * Obtém as tarefas do armazenamento local e carrega na página
+ */
 function getTasks() {
   let activeTasksArrayJSON = localStorage.getItem("Ativas");
   let completeTasksArrayJSON = localStorage.getItem("Concluidas");
@@ -330,10 +439,16 @@ function getTasks() {
   }
 }
 
+/**
+ * Salva a tarefa ativa no armazenamento local
+ */
 function saveCurrentTask() {
   localStorage.setItem("Atual", currentTask);
 }
 
+/**
+ * Obtém a tarefa ativa do armazenamento local e a destaca na lista de tarefas
+ */
 function getCurrentTask() {
   const tasks = taskList.querySelectorAll("li");
   currentTask = localStorage.getItem("Atual");
@@ -345,6 +460,10 @@ function getCurrentTask() {
   currentTaskSection.textContent = currentTask;
 }
 
+/**
+ * Manipula a abertura e o fechamento da página de edição de tarefas
+ * @param {boolean} animationState - Indica se a animação de abertura/fechamento da página de edição será ativada/desativada
+ */
 function handlePageClose(animationState) {
   if (animationState) {
     overlayEditTask.style.display = "block";
@@ -357,6 +476,9 @@ function handlePageClose(animationState) {
   }
 }
 
+/**
+ * Remove a seleção das tarefas ativas
+ */
 function removeSelection() {
   let tasksArray = taskList.querySelectorAll("li");
 
@@ -367,7 +489,11 @@ function removeSelection() {
   currentTaskSection.textContent = "";
 }
 
-function errorMessage(i) {
+/**
+ * Exibe mensagens de erro
+ * @param {boolean} i - Índice da mensagem de erro a ser exibida
+ */
+function displayErrorMessage(i) {
   let errorMessage;
 
   if (i === 0) {
@@ -384,5 +510,6 @@ function errorMessage(i) {
   }, 5000);
 }
 
+// Carrega as tarefas ao carregar a página
 getTasks();
 getCurrentTask();
