@@ -149,7 +149,7 @@ function toggleTimer() {
     interval = setInterval(() => {
       let response = counter(context);
       timer.innerHTML = response;
-    }, 100);
+    }, 1000);
   }
 }
 
